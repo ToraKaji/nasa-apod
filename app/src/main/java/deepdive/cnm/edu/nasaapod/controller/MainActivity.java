@@ -1,16 +1,23 @@
-package deepdive.cnm.edu.nasaapod;
+package deepdive.cnm.edu.nasaapod.controller;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.CalendarView;
 import android.widget.ProgressBar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import deepdive.cnm.edu.nasaapod.BuildConfig;
+import deepdive.cnm.edu.nasaapod.R;
+import deepdive.cnm.edu.nasaapod.model.Apod;
+import deepdive.cnm.edu.nasaapod.service.ApodService;
 import java.util.Calendar;
-
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 private  static final String Date_Format = "yyyy-MM-dd";
 private static final String CALENDER_KEY = "calender";
@@ -21,12 +28,16 @@ private String apiKey;
 private ProgressBar progressSpinner;
 private FloatingActionButton jumpDate;
 private Calendar calendar;
+private ApodService service;
+private Apod apod;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     setupWebView();
+    setupService();
+    setupUI();
   }
 
   private void setupWebView(){
@@ -49,5 +60,31 @@ private Calendar calendar;
     settings.setDisplayZoomControls(false);
     settings.setUseWideViewPort(true);
     settings.setLoadWithOverviewMode(true);
+  }
+
+  private void setupUI(){
+    progressSpinner = findViewById(R.id.progress_spinner);
+    progressSpinner.setVisibility(View.GONE);
+    jumpDate = findViewById(R.id.jump_date);
+    jumpDate.setOnClickListener(new OnClickListener() {
+      //TODO Use lambda form
+      @Override
+      public void onClick(View v) {
+        //TODO Dispay date picker
+      }
+    });
+  }
+
+  private void setupService(){
+    Gson gson = new GsonBuilder()
+        .excludeFieldsWithoutExposeAnnotation()
+        .setDateFormat(Date_Format)
+        .create();
+    Retrofit retrofit = new Retrofit.Builder()
+        .baseUrl(getString(R.string.base_url))
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build();
+    service = retrofit.create(ApodService.class);
+    apiKey = BuildConfig.API_KEY;
   }
 }
