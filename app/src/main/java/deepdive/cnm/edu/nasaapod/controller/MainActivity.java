@@ -1,6 +1,5 @@
 package deepdive.cnm.edu.nasaapod.controller;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
     setupDefaults(savedInstanceState);
   }
 
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putLong(CALENDAR_KEY, calendar.getTimeInMillis());
+    outState.putParcelable(APOD_KEY, apod);
+  }
+
   private void setupWebView() {
     webView = findViewById(R.id.web_view);
     webView.setWebViewClient(new WebViewClient() {
@@ -98,8 +104,16 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupDefaults(Bundle savedInstanceState) {
     calendar = Calendar.getInstance();
-    // TODO Check for savedInstanceState
-    new ApodTask().execute();
+    if (savedInstanceState != null) {
+      calendar.setTimeInMillis(savedInstanceState.getLong(CALENDAR_KEY, calendar.getTimeInMillis()));
+      apod = savedInstanceState.getParcelable(APOD_KEY);
+    }
+    if (apod != null) {
+      progressSpinner.setVisibility(View.VISIBLE);
+      webView.loadUrl(apod.getUrl());
+    } else {
+      new ApodTask().execute();
+    }
   }
 
   private void pickDate() {
@@ -128,9 +142,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCancelled(Apod apod) {
-      Context context = MainActivity.this;
       progressSpinner.setVisibility(View.GONE);
-      Toast.makeText(context, R.string.error_message, Toast.LENGTH_LONG).show();
+      Toast.makeText(MainActivity.this, R.string.error_message, Toast.LENGTH_LONG).show();
     }
 
     @Override

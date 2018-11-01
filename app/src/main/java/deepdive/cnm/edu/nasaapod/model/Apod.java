@@ -8,8 +8,7 @@ import java.util.Date;
 
 public class Apod implements Parcelable {
 
-
-  private static final Creator CREATOR = new Creator();
+  public static final Creator CREATOR = new Creator();
 
   @Expose
   private Date date;
@@ -102,7 +101,6 @@ public class Apod implements Parcelable {
     this.serviceVersion = serviceVersion;
   }
 
-
   @Override
   public int describeContents() {
     return 0;
@@ -110,14 +108,29 @@ public class Apod implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-//TODO Write fields to dest
+    dest.writeLong(date.getTime());
+    dest.writeString(title);
+    dest.writeString(explanation);
+    dest.writeString(copyright);
+    dest.writeString(url);
+    dest.writeString(mediaType);
+    dest.writeString(hdUrl);
+    dest.writeString(serviceVersion);
   }
 
   private static class Creator implements Parcelable.Creator<Apod> {
 
     @Override
     public Apod createFromParcel(Parcel source) {
-      //TODO create Apod object and populate its fields from source
+      Apod apod = new Apod();
+      apod.date = new Date(source.readLong());
+      apod.title = source.readString();
+      apod.explanation = source.readString();
+      apod.copyright = source.readString();
+      apod.url = source.readString();
+      apod.mediaType = source.readString();
+      apod.hdUrl = source.readString();
+      apod.serviceVersion = source.readString();
       return null;
     }
 
@@ -125,5 +138,7 @@ public class Apod implements Parcelable {
     public Apod[] newArray(int size) {
       return new Apod[size];
     }
+
   }
+
 }
