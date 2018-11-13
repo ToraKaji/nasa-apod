@@ -1,9 +1,13 @@
 package deepdive.cnm.edu.nasaapod.controller;
 
+import android.app.Application;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -11,8 +15,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import com.google.android.gms.common.SignInButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import deepdive.cnm.edu.nasaapod.ApodApplication;
 import deepdive.cnm.edu.nasaapod.BuildConfig;
 import deepdive.cnm.edu.nasaapod.R;
 import deepdive.cnm.edu.nasaapod.controller.DateTimePickerFragment.Mode;
@@ -23,6 +29,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.zip.Inflater;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -49,6 +56,26 @@ public class MainActivity extends AppCompatActivity {
     setupService();
     setupUI();
     setupDefaults(savedInstanceState);
+
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+   boolean handled = true;
+    switch (item.getItemId()){
+      case R.id.sign_out:
+        signOut();
+        break;
+    default:
+      handled = super.onOptionsItemSelected(item);
+    }
+    return handled;
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu, menu);
+    return true;
   }
 
   @Override
@@ -124,6 +151,16 @@ public class MainActivity extends AppCompatActivity {
     picker.show(getSupportFragmentManager(), picker.getClass().getSimpleName());
   }
 
+  private void signOut(){
+    ApodApplication app = ApodApplication.getInstance();
+    app.getClient().signOut().addOnCompleteListener(this, (task) -> {
+      app.setAccount(null);
+      Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+      startActivity(intent);
+    });
+
+  }
   private class ApodTask extends AsyncTask<Date, Void, Apod> {
 
     private Date date;
